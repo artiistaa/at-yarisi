@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>GallopAI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Oswald:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d1117;--bg2:#161b22;--bg3:#1c2128;--bg4:#21262d;
+  --border:#30363d;--gold:#e3a008;--gold2:#fbbf24;
+  --cyan:#00b4d8;--green:#22c55e;--red:#ef4444;--purple:#a855f7;--orange:#f97316;
+  --text:#e6edf3;--muted:#8b949e;--muted2:#484f58;
+  --fb:'Inter',sans-serif;--fl:'Oswald',sans-serif;
+}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);font-size:13px;min-height:100vh}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* TOP */
+.top{position:sticky;top:0;z-index:100;background:var(--bg2);border-bottom:1px solid var(--border);padding:.5rem 1rem;display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.logo{font-family:var(--fl);font-size:17px;color:var(--gold);letter-spacing:1px;white-space:nowrap}
+.sep{width:1px;height:20px;background:var(--border)}
+input[type=date]{background:var(--bg3);border:1px solid var(--gold);color:var(--gold);padding:.3rem .6rem;border-radius:3px;font-family:var(--fb);font-size:12px;cursor:pointer}
+input[type=date]:focus{outline:none}
+.sel{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.3rem .6rem;border-radius:3px;font-size:12px;cursor:pointer;min-width:130px}
+.sel:focus{outline:none;border-color:var(--gold)}
+.sel option{background:var(--bg2)}
+.btn{font-family:var(--fl);font-size:11px;background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:.3rem .75rem;border-radius:3px;cursor:pointer;transition:all .15s}
+.btn:hover{color:var(--text)}
+.status{font-size:11px;color:var(--muted);margin-left:auto;display:flex;align-items:center;gap:5px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* RACE TABS */
+.race-tabs{background:var(--bg2);border-bottom:1px solid var(--border);padding:.3rem 1rem;overflow-x:auto;white-space:nowrap}
+.rtab{display:inline-block;background:var(--bg3);border:1px solid var(--border);color:var(--muted);padding:.22rem .6rem;border-radius:3px;cursor:pointer;font-size:11px;font-family:var(--fl);margin-right:3px;transition:all .15s}
+.rtab:hover{color:var(--text)}
+.rtab.active{background:var(--gold);border-color:var(--gold);color:#000;font-weight:600}
+
+/* RACE INFO */
+.race-hdr{background:var(--bg2);border-bottom:1px solid var(--border);padding:.4rem 1rem;display:none;align-items:center;gap:1rem;flex-wrap:wrap}
+.rh-no{font-family:var(--fl);font-size:15px;color:var(--gold)}
+.rh-type{font-size:12px}
+.rh-dist{font-family:var(--fl);font-size:13px;color:var(--green)}
+.rh-pist{font-size:11px;color:var(--muted);border:1px solid var(--border);padding:1px 7px;border-radius:10px}
+.rh-time{font-size:11px;color:var(--cyan)}
+.rh-prize{font-size:11px;color:var(--gold);margin-left:auto}
+
+/* STAT BARS */
+.stat-bars{background:var(--bg2);border-bottom:1px solid var(--border);padding:.45rem 1rem;display:none;grid-template-columns:repeat(4,1fr);gap:1px}
+.sb{background:var(--bg3);padding:.45rem .6rem}
+.sb-t{font-family:var(--fl);font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:.35rem}
+.sb-bars{display:flex;align-items:flex-end;gap:2px;height:48px}
+.sb-col{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1}
+.sb-bar{width:100%;border-radius:2px 2px 0 0;display:flex;align-items:flex-start;justify-content:center;padding-top:1px;font-size:9px;font-weight:700;color:#000;min-height:4px}
+.sb-lbl{font-size:8px;color:var(--muted);text-align:center;line-height:1.2}
+
+/* PRIZE */
+.prize-row{background:var(--bg3);border-bottom:1px solid var(--border);padding:.3rem 1rem;display:none;gap:1.5rem;font-size:11px;flex-wrap:wrap}
+.prize-item span{color:var(--gold);font-weight:600}
+
+/* MAIN TABS */
+.main-tabs{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 1rem;display:none;gap:0}
+.mt{padding:.5rem 1rem;font-family:var(--fl);font-size:12px;letter-spacing:.5px;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;transition:color .2s,border-color .2s;white-space:nowrap;display:flex;align-items:center;gap:5px}
+.mt:hover{color:var(--text)}
+.mt.active{color:var(--gold);border-bottom-color:var(--gold)}
+
+/* FILTER ROW */
+.filter-row{background:var(--bg3);border-bottom:1px solid var(--border);padding:.35rem 1rem;display:none;align-items:center;gap:.4rem;flex-wrap:wrap}
+.fc{background:var(--bg4);border:1px solid var(--border);color:var(--muted);padding:.18rem .6rem;border-radius:10px;font-size:11px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.fc:hover{color:var(--text)}
+.fc.on{background:rgba(227,160,8,.12);border-color:var(--gold);color:var(--gold)}
+.fsearch{background:var(--bg4);border:1px solid var(--border);color:var(--text);padding:.22rem .6rem;border-radius:3px;font-size:12px;font-family:var(--fb);margin-left:auto;width:140px}
+.fsearch::placeholder{color:var(--muted2)}.fsearch:focus{outline:none;border-color:var(--gold)}
+
+/* LAYOUT */
+.layout{display:flex;min-height:calc(100vh - 180px)}
+.main{flex:1;overflow-x:auto}
+.side{width:270px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);overflow-y:auto}
+@media(max-width:900px){.side{display:none}}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse;min-width:700px}
+thead tr{background:var(--bg3);position:sticky;top:0;z-index:5}
+th{padding:.38rem .5rem;font-family:var(--fl);font-size:10px;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;text-align:center;border-right:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:var(--text)}
+th.asc::after{content:' ↑';color:var(--gold)}
+th.desc::after{content:' ↓';color:var(--gold)}
+th:first-child{text-align:left;padding-left:.75rem}
+th:last-child{border-right:none}
+tbody tr{border-bottom:1px solid rgba(48,54,61,.4);cursor:pointer;transition:background .1s}
+tbody tr:hover{background:var(--bg3)}
+tbody tr.sel{background:rgba(0,180,216,.07)!important;outline:1px solid rgba(0,180,216,.2)}
+td{padding:.35rem .5rem;text-align:center;border-right:1px solid rgba(48,54,61,.35);vertical-align:middle;white-space:nowrap}
+td:first-child{text-align:left;padding-left:.75rem}
+td:last-child{border-right:none}
+.badge{display:inline-flex;align-items:center;justify-content:center;width:23px;height:23px;border-radius:50%;font-weight:700;font-size:11px}
+.hn{font-weight:600;font-size:13px}
+.hn small{display:block;font-size:10px;font-weight:300;color:var(--muted);margin-top:1px}
+.sc{font-weight:600;font-size:12px;border-radius:2px;padding:2px 5px;display:inline-block;min-width:26px;text-align:center}
+.h{background:rgba(34,197,94,.18);color:var(--green)}
+.m{background:rgba(227,160,8,.14);color:var(--gold)}
+.l{background:rgba(107,114,128,.1);color:var(--muted)}
+.z{color:var(--muted2)}
+.bar-cell{display:flex;align-items:center;gap:4px;min-width:80px}
+.bar-bg{flex:1;height:5px;background:var(--bg4);border-radius:2px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px}
+.form-dots{display:flex;gap:2px;justify-content:center}
+.fd{width:14px;height:14px;border-radius:50%;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.f1{background:var(--green);color:#000}.f2{background:var(--gold);color:#000}.f3{background:var(--orange);color:#000}.fn{background:var(--bg4);color:var(--muted)}
+.rating{font-family:var(--fl);font-size:13px;font-weight:600;color:var(--gold)}
+.agf-badge{background:rgba(227,160,8,.12);color:var(--gold);border-radius:2px;padding:1px 5px;font-size:10px;font-weight:600}
+
+/* SUB TABS */
+.sub-tabs{display:flex;gap:2px;padding:.35rem 1rem;background:var(--bg3);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.stab{font-family:var(--fl);font-size:11px;letter-spacing:.3px;background:var(--bg4);border:1px solid var(--border);color:var(--muted);padding:.25rem .7rem;border-radius:2px;cursor:pointer;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:4px}
+.stab:hover{color:var(--text)}
+.stab.active{background:var(--gold);border-color:var(--gold);color:#000;font-weight:600}
+
+/* YAPAY ZEKA TAB */
+.yz-wrap{padding:1rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.yz-left{background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:1rem}
+.yz-right{background:var(--bg2);border:1px solid var(--gold);border-radius:3px;padding:1rem}
+.yz-title{font-family:var(--fl);font-size:11px;letter-spacing:1.5px;color:var(--gold);text-transform:uppercase;margin-bottom:.75rem;text-align:center}
+.yz-text{font-size:13px;color:rgba(255,255,255,.75);line-height:1.8}
+.yz-text b{color:var(--gold)}
+.kupon-title{font-family:var(--fl);font-size:13px;font-weight:600;color:var(--gold);text-align:center;margin-bottom:.5rem}
+.kupon-tutar{font-family:var(--fl);font-size:16px;font-weight:600;color:var(--green);text-align:center;margin-bottom:.75rem}
+.kupon-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin-bottom:.5rem}
+.kg-head{background:var(--bg3);font-family:var(--fl);font-size:11px;color:var(--gold);text-align:center;padding:.3rem;border:1px solid var(--border);border-radius:2px}
+.kg-cell{background:var(--bg3);border:1px solid var(--border);border-radius:2px;padding:.25rem;text-align:center;font-size:12px;font-weight:600}
+.kg-cell.banko{background:rgba(239,68,68,.15);border-color:var(--red);color:var(--red)}
+.kg-cell.alt{background:rgba(0,180,216,.1);border-color:var(--cyan);color:var(--cyan)}
+
+/* DİJİTAL METRE */
+.metre-wrap{padding:1rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem}
+@media(max-width:900px){.metre-wrap{grid-template-columns:repeat(2,1fr)}}
+.metre-card{background:var(--bg2);border:1px solid var(--border);border-radius:3px;padding:.75rem}
+.mc-title{font-family:var(--fl);font-size:11px;color:var(--gold);letter-spacing:.5px;margin-bottom:.6rem;text-align:center;border-bottom:1px solid var(--border);padding-bottom:.4rem}
+.mc-row{display:flex;align-items:center;gap:.5rem;padding:.2rem 0}
+.mc-no{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.mc-bar-bg{flex:1;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.mc-bar-fill{height:100%;border-radius:3px}
+.mc-pct{font-size:11px;font-weight:600;min-width:45px;text-align:right}
+
+/* SIDE */
+.ss{border-bottom:1px solid var(--border);padding:.6rem}
+.ss-t{font-family:var(--fl);font-size:10px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:.5rem}
+.ai-btn{width:100%;background:var(--gold);color:#000;border:none;padding:.5rem;font-family:var(--fl);font-size:12px;letter-spacing:.5px;cursor:pointer;border-radius:2px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .2s}
+.ai-btn:hover{background:var(--gold2)}.ai-btn:disabled{opacity:.5;cursor:not-allowed}
+.ld{display:none;align-items:center;gap:3px}.ld.on{display:flex}
+.ldd{width:5px;height:5px;border-radius:50%;background:#000;animation:ld 1s infinite}
+.ldd:nth-child(2){animation-delay:.2s}.ldd:nth-child(3){animation-delay:.4s}
+@keyframes ld{0%,80%,100%{transform:scale(.5)}40%{transform:scale(1)}}
+.ar{display:flex;align-items:center;gap:.5rem;padding:.32rem 0;border-bottom:1px solid rgba(48,54,61,.4)}
+.ar:last-child{border-bottom:none}
+.ar-rk{font-family:var(--fl);font-size:14px;font-weight:600;width:16px;flex-shrink:0}
+.ar-rk.r1{color:var(--gold)}.ar-rk.r2{color:#c0c0c0}.ar-rk.r3{color:#cd7f32}
+.ar-info{flex:1;min-width:0}
+.ar-nm{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.ar-rs{font-size:10px;color:var(--muted);margin-top:1px;line-height:1.3}
+.ar-bar{height:3px;background:var(--bg4);border-radius:1px;margin-top:3px;overflow:hidden}
+.ar-bf{height:100%;border-radius:1px}
+.ar-pb{font-family:var(--fl);font-size:13px;font-weight:600}
+.ai-sum{margin-top:.6rem;padding:.5rem;background:rgba(227,160,8,.04);border-left:2px solid var(--gold);font-size:11px;color:rgba(255,255,255,.6);line-height:1.6;font-style:italic}
+.hd-row{display:flex;justify-content:space-between;font-size:11px;padding:4px 0;border-bottom:1px solid rgba(48,54,61,.4)}
+.hd-row:last-child{border-bottom:none}
+.hdk{color:var(--muted)}.hdv{color:var(--text);font-weight:500}
+
+.empty{padding:3rem;text-align:center;color:var(--muted2)}
+.spin{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--gold);animation:spin .7s linear infinite;margin:2rem auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-overlay.on{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:4px;padding:1.25rem;width:600px;max-width:95vw;max-height:80vh;display:flex;flex-direction:column;gap:.75rem}
+.modal-title{font-family:var(--fl);font-size:13px;color:var(--gold);letter-spacing:1px}
+.modal-desc{font-size:11px;color:var(--muted);line-height:1.7}
+.modal-desc b{color:var(--text)}
+.modal-textarea{flex:1;min-height:200px;background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:.6rem;font-family:var(--fb);font-size:12px;resize:vertical;border-radius:2px}
+.modal-textarea:focus{outline:none;border-color:var(--gold)}
+.modal-btns{display:flex;gap:.5rem;justify-content:flex-end}
+.modal-btn{font-family:var(--fl);font-size:11px;letter-spacing:.5px;padding:.35rem .9rem;border-radius:2px;cursor:pointer;border:1px solid var(--border)}
+.modal-btn.cancel{background:var(--bg3);color:var(--muted)}
+.modal-btn.ok{background:var(--gold);color:#000;border-color:var(--gold);font-weight:600}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--gold);color:var(--text);padding:.6rem 1rem;font-size:12px;z-index:999;border-radius:2px;max-width:280px;transform:translateX(130%);transition:transform .3s}
+.toast.on{transform:none}.toast.err{border-left-color:var(--red)}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="logo">🐎 GallopAI</div>
+  <div class="sep"></div>
+  <input type="date" id="datePick" onchange="onDate()">
+  <select class="sel" id="citySel" onchange="loadCity()">
+    <option value="">Şehir yükleniyor...</option>
+  </select>
+  <button class="btn" onclick="refresh()">⟳ Yenile</button>
+  <button class="btn" onclick="openImport()" style="border-color:var(--cyan);color:var(--cyan)">📋 DA Import</button>
+  <div class="status"><div class="dot"></div><span id="statusTxt">Hazır</span></div>
+</div>
+
+<div class="race-tabs" id="raceTabs"></div>
+<div class="race-hdr" id="raceHdr">
+  <div class="rh-no" id="rhNo"></div>
+  <div class="rh-type" id="rhType"></div>
+  <div class="rh-dist" id="rhDist"></div>
+  <div class="rh-pist" id="rhPist"></div>
+  <div class="rh-time" id="rhTime"></div>
+  <div class="rh-prize" id="rhPrize"></div>
+</div>
+<div class="prize-row" id="prizeRow"></div>
+<div class="stat-bars" id="statBars">
+  <div class="sb"><div class="sb-t">Ganyan İst.</div><div class="sb-bars" id="sb0"></div></div>
+  <div class="sb"><div class="sb-t">Handikap İst.</div><div class="sb-bars" id="sb1"></div></div>
+  <div class="sb"><div class="sb-t">Kilo Dağılımı</div><div class="sb-bars" id="sb2"></div></div>
+  <div class="sb"><div class="sb-t">Cinsiyet İst.</div><div class="sb-bars" id="sb3"></div></div>
+</div>
+
+<div class="main-tabs" id="mainTabs">
+  <div class="mt active" onclick="switchTab('analiz')">🔍 Koşu Analiz</div>
+  <div class="mt" onclick="switchTab('istatistik')">📊 Koşu İstatistik</div>
+  <div class="mt" onclick="switchTab('yapay')">💡 Yapay Zeka Tahmin</div>
+  <div class="mt" onclick="switchTab('metre')">📏 Dijital Metre</div>
+</div>
+
+<div class="sub-tabs" id="subTabs" style="display:none">
+  <span style="font-size:10px;color:var(--muted);font-family:var(--fl);letter-spacing:1px;padding:.25rem 0">İSTATİSTİK:</span>
+  <button class="stab active" onclick="setSubTab(this,'at')">📊 At İstatistikleri</button>
+  <button class="stab" onclick="setSubTab(this,'jokey')">🏇 Jokey/Apranti İstatistikleri</button>
+  <button class="stab" onclick="setSubTab(this,'antrenor')">🎯 Antrenör İstatistikleri</button>
+  <button class="stab" onclick="setSubTab(this,'sahip')">👑 Sahip İstatistikleri</button>
+</div>
+<div class="filter-row" id="filterRow">
+  <span style="font-family:var(--fl);font-size:10px;color:var(--muted);letter-spacing:1px">FİLTRE:</span>
+  <button class="fc on" onclick="setFilter(this,'all')">Tümü</button>
+  <button class="fc" onclick="setFilter(this,'fav')">⭐ Favori</button>
+  <button class="fc" onclick="setFilter(this,'form')">📈 Form</button>
+  <button class="fc" onclick="setFilter(this,'hc')">↑ Yüksek HC</button>
+  <button class="fc" onclick="setFilter(this,'kgs')">↓ Düşük KGS</button>
+  <button class="fc" onclick="setFilter(this,'young')">Genç (3-4y)</button>
+  <button class="fc" onclick="setFilter(this,'cim')">🌿 Çim</button>
+  <button class="fc" onclick="setFilter(this,'weight')">⚖️ Kilo</button>
+  <input class="fsearch" type="text" placeholder="At ara..." id="searchQ" oninput="render()">
+</div>
+
+<div class="layout">
+  <div class="main" id="mainArea"><div class="empty">Tarih ve şehir seçin</div></div>
+  <div class="side">
+    <div class="ss">
+      <div class="ss-t">⚡ Yapay Zeka</div>
+      <button class="ai-btn" id="aiBtn" onclick="runAI()">
+        <span id="aiBtnTxt">AI ile Analiz Et</span>
+        <div class="ld" id="aiLd"><div class="ldd"></div><div class="ldd"></div><div class="ldd"></div></div>
+      </button>
+      <div style="font-size:10px;color:var(--muted2);margin-top:.35rem;text-align:center">Sonuç garantisi verilmez</div>
+      <div id="aiRes" style="display:none;margin-top:.6rem"></div>
+    </div>
+    <div class="ss" id="hdSec" style="display:none">
+      <div class="ss-t">At Detayı</div>
+      <div id="hdContent"></div>
+    </div>
+    <div class="ss">
+      <div class="ss-t">Koşu Özeti</div>
+      <div id="summary" style="font-size:11px;color:var(--muted);line-height:1.9"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <div class="modal-title">📋 DijitalAnaliz Import</div>
+    <div class="modal-desc">
+      <b>Nasıl yapılır:</b><br>
+      1. DijitalAnaliz'de <b>Koşu İstatistik</b> → <b>At İstatistikleri</b> tabına git<br>
+      2. Tablodaki tüm satırları seç (<b>Ctrl+A</b> veya mouse ile)<br>
+      3. Kopyala (<b>Ctrl+C</b>)<br>
+      4. Aşağıya yapıştır (<b>Ctrl+V</b>)<br>
+      5. <b>İçe Aktar</b> butonuna bas
+    </div>
+    <textarea class="modal-textarea" id="importText" placeholder="DijitalAnaliz tablosunu buraya yapıştır..."></textarea>
+    <div style="font-size:10px;color:var(--muted2)" id="importPreview"></div>
+    <div class="modal-btns">
+      <button class="modal-btn cancel" onclick="closeImport()">İptal</button>
+      <button class="modal-btn ok" onclick="doImport()">⚡ İçe Aktar</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const API = window.location.origin;
+const UNIT = 1.25;
+const COLORS = ['#e3a008','#c0c0c0','#cd7f32','#00b4d8','#a855f7','#22c55e','#ef4444','#f97316','#8b5cf6','#06b6d4','#84cc16','#f59e0b','#10b981','#6366f1','#ec4899','#14b8a6','#0ea5e9','#d946ef','#f43f5e','#a3e635'];
+
+let date = new Date();
+let races = [], raceIdx = 0;
+let activeTab = 'analiz', activeFilter = 'all';
+let sortCol = '_scores.rating', sortDir = -1;
+let selHorse = null, aiData = null;
+
+// INIT
+(function(){
+  const d = date;
+  const p = document.getElementById('datePick');
+  p.value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  loadCities();
+})();
+
+function pad(n){ return String(n).padStart(2,'0'); }
+function fmt(d){ return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`; }
+// ── DA IMPORT ────────────────────────────────────────────────────────────────
+function openImport() {
+  document.getElementById('importModal').classList.add('on');
+  document.getElementById('importText').value = '';
+  document.getElementById('importPreview').textContent = '';
+}
+function closeImport() {
+  document.getElementById('importModal').classList.remove('on');
+}
+
+function parseDATable(text) {
+  // DA tablosunu parse et
+  // Format: SNo | AtAdi | Genel | Şehir | Pist | Mesafe | Form | Kilo | PistMes | BabaPist | AnnePist | KardeşPist | BabaMes | AnneMes | AtBin | AtAntr | AtSahip | Rating
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l && l.length > 3);
+  const horses = [];
+
+  for (const line of lines) {
+    // Tab veya boşlukla ayrılmış
+    const cols = line.split(/	/).map(c => c.trim());
+    if (cols.length < 5) continue;
+
+    // İlk kolon sayı mı? (SıraNo)
+    const no = parseInt(cols[0]);
+    if (isNaN(no) || no < 1 || no > 30) continue;
+
+    const name = cols[1]?.replace(/\s*%\d+.*$/, '').trim();
+    if (!name || name.length < 2) continue;
+
+    horses.push({
+      horse_no:    no,
+      horse_name:  name,
+      da_genel:    parseInt(cols[2]) || 0,
+      da_sehir:    parseInt(cols[3]) || 0,
+      da_pist:     parseInt(cols[4]) || 0,
+      da_mesafe:   parseInt(cols[5]) || 0,
+      da_form:     parseInt(cols[6]) || 0,
+      da_kilo:     parseFloat((cols[7]||'').replace(',','.')) || 0,
+      da_pist_mes: parseInt(cols[8]) || 0,
+      da_baba_pist:parseInt(cols[9]) || 0,
+      da_anne_pist:parseInt(cols[10]) || 0,
+      da_k_pist:   parseInt(cols[11]) || 0,
+      da_baba_mes: parseInt(cols[12]) || 0,
+      da_anne_mes: parseInt(cols[13]) || 0,
+      da_at_bin:   parseInt(cols[14]) || 0,
+      da_at_antr:  parseInt(cols[15]) || 0,
+      da_at_sahip: parseInt(cols[16]) || 0,
+      da_rating:   parseInt(cols[17]) || 0,
+    });
+  }
+  return horses;
+}
+
+function doImport() {
+  const text = document.getElementById('importText').value;
+  if (!text.trim()) { showToast('Veri boş!', true); return; }
+
+  const daHorses = parseDATable(text);
+  if (daHorses.length === 0) {
+    showToast('Veri okunamadı. Tabloyu doğru kopyaladığından emin ol.', true);
+    return;
+  }
+
+  // Mevcut koşudaki atları DA verisiyle birleştir
+  const race = races[raceIdx];
+  if (!race) { showToast('Önce bir koşu seç!', true); return; }
+
+  let matched = 0;
+  race.horses = race.horses.map(h => {
+    // İsim veya numara ile eşleştir
+    const da = daHorses.find(d =>
+      d.horse_no === h.horse_no ||
+      d.horse_name.toLowerCase() === (h.horse_name||'').toLowerCase() ||
+      (h.horse_name||'').toLowerCase().includes(d.horse_name.toLowerCase()) ||
+      d.horse_name.toLowerCase().includes((h.horse_name||'').toLowerCase())
+    );
+    if (!da) return h;
+    matched++;
+    return {
+      ...h,
+      scores: {
+        ...h.scores,
+        genel:       da.da_genel,
+        sehir:       da.da_sehir,
+        pist:        da.da_pist,
+        mesafe:      da.da_mesafe,
+        form:        da.da_form,
+        pist_mesafe: da.da_pist_mes,
+        baba_pist:   da.da_baba_pist,
+        anne_pist:   da.da_anne_pist,
+        kardes_pist: da.da_k_pist,
+        baba_mesafe: da.da_baba_mes,
+        anne_mesafe: da.da_anne_mes,
+        at_binici:   da.da_at_bin,
+        at_antrenor: da.da_at_antr,
+        at_sahip:    da.da_at_sahip,
+        rating:      da.da_rating || h.scores?.rating,
+      },
+      da_imported: true,
+    };
+  });
+
+  // DA'dan yeni at ekle (bizde olmayan)
+  daHorses.forEach(da => {
+    const exists = race.horses.find(h => h.horse_no === da.horse_no);
+    if (!exists) {
+      race.horses.push({
+        horse_no:   da.horse_no,
+        horse_name: da.horse_name,
+        scores: {
+          genel: da.da_genel, sehir: da.da_sehir, pist: da.da_pist,
+          mesafe: da.da_mesafe, form: da.da_form, rating: da.da_rating,
+          pist_mesafe: da.da_pist_mes, baba_pist: da.da_baba_pist,
+          anne_pist: da.da_anne_pist, kardes_pist: da.da_k_pist,
+          baba_mesafe: da.da_baba_mes, anne_mesafe: da.da_anne_mes,
+          at_binici: da.da_at_bin, at_antrenor: da.da_at_antr, at_sahip: da.da_at_sahip,
+        },
+        da_imported: true,
+      });
+    }
+  });
+
+  closeImport();
+  sortCol = '_scores.rating';
+  sortDir = -1;
+  activeTab = 'istatistik';
+  document.querySelectorAll('.mt').forEach((t,i) => t.classList.toggle('active', i===1));
+  render();
+  showToast(`✅ ${matched} at eşleşti, ${daHorses.length} at import edildi`);
+}
+
+// Import textarea preview - delayed init
+setTimeout(() => {
+  const ta = document.getElementById('importText');
+  if (ta) ta.addEventListener('input', () => {
+    const horses = parseDATable(ta.value);
+    document.getElementById('importPreview').textContent =
+      horses.length > 0 ? `${horses.length} at algılandı: ${horses.slice(0,3).map(h=>h.horse_name).join(', ')}...` : '';
+  });
+}, 500);
+
+function setStatus(m){ document.getElementById('statusTxt').textContent = m; }
+function showToast(m, err=false){
+  const t=document.getElementById('toast');
+  t.textContent=m; t.className='toast'+(err?' err':'')+' on';
+  setTimeout(()=>t.classList.remove('on'),3000);
+}
+
+function onDate(){
+  const v=document.getElementById('datePick').value;
+  if(!v) return;
+  const [y,m,d]=v.split('-').map(Number);
+  date=new Date(y,m-1,d);
+  races=[];aiData=null;
+  loadCities();
+}
+
+async function loadCities(){
+  setStatus('Şehirler yükleniyor...');
+  const sel=document.getElementById('citySel');
+  sel.innerHTML='<option value="">Yükleniyor...</option>';
+  try{
+    const r=await fetch(`${API}/api/cities?date=${encodeURIComponent(fmt(date))}`);
+    const d=await r.json();
+    if(!d.ok) throw new Error(d.error);
+    sel.innerHTML='<option value="">-- Şehir Seçin --</option>';
+    (d.cities||[]).forEach(c=>{
+      const o=document.createElement('option');
+      o.value=c.key; o.textContent=c.name;
+      sel.appendChild(o);
+    });
+    if(d.cities?.length>0){ sel.value=d.cities[0].key; loadCity(); }
+    else{ setStatus('Bu tarihte yarış yok'); showToast('Yarış bulunamadı',true); }
+  }catch(e){
+    sel.innerHTML='<option value="">Hata</option>';
+    setStatus('Bağlantı hatası');
+    showToast(e.message,true);
+  }
+}
+
+async function loadCity(){
+  const city=document.getElementById('citySel').value;
+  if(!city) return;
+  aiData=null; selHorse=null;
+  hideAll();
+  document.getElementById('mainArea').innerHTML='<div class="spin"></div>';
+  setStatus('Yükleniyor...');
+  try{
+    const r=await fetch(`${API}/api/program?city=${city}&date=${encodeURIComponent(fmt(date))}`);
+    const d=await r.json();
+    if(!d.ok) throw new Error(d.error||'Veri alınamadı');
+    races=d.races||[];
+    if(!races.length){
+      document.getElementById('mainArea').innerHTML='<div class="empty">Bu tarihte koşu bulunamadı</div>';
+      setStatus('Koşu yok'); return;
+    }
+    buildRaceTabs();
+    selectRace(0);
+    setStatus(`${d.cityName} · ${races.length} koşu · ${d.totalHorses} at`);
+  }catch(e){
+    document.getElementById('mainArea').innerHTML=`<div class="empty">Hata: ${e.message}</div>`;
+    setStatus('Hata'); showToast(e.message,true);
+  }
+}
+
+function hideAll(){
+  ['raceHdr','statBars','mainTabs','filterRow','prizeRow'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){ el.style.display='none'; }
+  });
+  document.getElementById('raceTabs').innerHTML='';
+}
+
+async function refresh(){ await loadCity(); showToast('Güncellendi'); }
+
+function buildRaceTabs(){
+  document.getElementById('raceTabs').innerHTML=races.map((r,i)=>
+    `<span class="rtab${i===0?' active':''}" onclick="selectRace(${i})">${r.label}<br><small style="font-size:9px;opacity:.7">${r.dist}m</small></span>`
+  ).join('');
+}
+
+function selectRace(i){
+  raceIdx=i; aiData=null; selHorse=null;
+  activeTab='analiz'; sortCol='_scores.rating'; sortDir=-1; activeFilter='all';
+  document.getElementById('aiRes').style.display='none';
+  document.getElementById('hdSec').style.display='none';
+  document.querySelectorAll('.rtab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.mt').forEach((t,j)=>t.classList.toggle('active',j===0));
+  document.querySelectorAll('.fc').forEach(b=>b.classList.remove('on'));
+  document.querySelector('.fc')?.classList.add('on');
+
+  const race=races[i];
+  if(!race) return;
+  const h=race.horses||[];
+
+  // Race header
+  const rh=document.getElementById('raceHdr');
+  rh.style.display='flex';
+  document.getElementById('rhNo').textContent=race.label;
+  document.getElementById('rhType').textContent=race.type||'';
+  document.getElementById('rhDist').textContent=race.dist+'m';
+  document.getElementById('rhPist').textContent=race.surf;
+  document.getElementById('rhTime').textContent='🕐 '+(race.time||'--:--');
+  document.getElementById('rhPrize').textContent=race.prize?'🏆 '+race.prize:'';
+
+  // Prize row
+  const pr=document.getElementById('prizeRow');
+  pr.style.display='flex';
+  pr.innerHTML='<span style="color:var(--muted)">İkramiye:</span>'+
+    (race.prize?`<span>1.) <span>${race.prize}</span></span>`:'');
+
+  // Stat bars
+  buildStatBars(h);
+  document.getElementById('statBars').style.display='grid';
+
+  // Main tabs + filter
+  document.getElementById('mainTabs').style.display='flex';
+  document.getElementById('filterRow').style.display='flex';
+  document.getElementById('subTabs').style.display='none';
+
+  // Summary
+  const top=[...h].sort((a,b)=>(b.scores?.rating||0)-(a.scores?.rating||0))[0];
+  document.getElementById('summary').innerHTML=
+    `Koşu: <b style="color:var(--text)">${race.label}</b><br>`+
+    `Saat: <b style="color:var(--cyan)">${race.time||'--:--'}</b><br>`+
+    `Mesafe: <b style="color:var(--green)">${race.dist}m ${race.surf}</b><br>`+
+    `At Sayısı: <b style="color:var(--text)">${h.length}</b><br>`+
+    `En Güçlü: <b style="color:var(--gold)">${top?.horse_name||'-'}</b>`;
+
+  // DA'dan istatistik çek (arka planda)
+  fetchDAAndMerge();
+  render();
+}
+
+// DA verisi çek ve merge et (tüm 4 tab)
+async function fetchDAAndMerge() {
+  const race = races[raceIdx];
+  if (!race) return;
+  const city = document.getElementById('citySel').value;
+  const dateStr = fmt(date);
+
+  setStatus('DA verisi yükleniyor...');
+
+  try {
+    const r = await fetch(`${API}/api/da/stats?city=${city}&date=${encodeURIComponent(dateStr)}&race=${race.no}`);
+    const d = await r.json();
+    if (!d.ok) { setStatus('DA bağlantı hatası'); return; }
+
+    const findHorse = (daList, h) => daList?.find(x =>
+      x.horse_no === h.horse_no ||
+      (h.horse_name||'').toLowerCase().slice(0,5) === (x.horse_name||'').toLowerCase().slice(0,5)
+    );
+    const findAnaliz = (h) => d.analiz?.find(x => x.no === h.horse_no);
+
+    let merged = 0;
+    race.horses = race.horses.map(h => {
+      const at    = findHorse(d.at, h);
+      const jokey = findHorse(d.jokey, h);
+      const antr  = findHorse(d.antrenor, h);
+      const sahip = findHorse(d.sahip, h);
+      const anlz  = findAnaliz(h);
+
+      if (!at && !jokey && !antr && !sahip && !anlz) return h;
+      merged++;
+
+      return {
+        ...h,
+        scores: {
+          ...h.scores,
+          // At İstatistikleri
+          genel:        at?.da_genel    || h.scores?.genel || 0,
+          sehir:        at?.da_sehir    || 0,
+          pist:         at?.da_pist     || 0,
+          mesafe:       at?.da_mesafe   || 0,
+          form:         at?.da_form     || h.scores?.form || 0,
+          pist_mesafe:  at?.da_pist_mes || 0,
+          baba_pist:    at?.da_baba_pist || 0,
+          anne_pist:    at?.da_anne_pist || 0,
+          kardes_pist:  at?.da_k_pist   || 0,
+          baba_mesafe:  at?.da_baba_mes  || 0,
+          anne_mesafe:  at?.da_anne_mes  || 0,
+          at_binici:    at?.da_at_bin   || 0,
+          at_antrenor:  at?.da_at_antr  || 0,
+          at_sahip:     at?.da_at_sahip || 0,
+          rating:         at?.da_rating || anlz?.rating || h.scores?.rating || 0,
+          dijital_derece: anlz?.dijital_derece || null,
+          dijital_galop:  anlz?.dijital_galop  || 0,
+          sart_uyumu:     anlz?.sart_uyumu     || 0,
+          hp:             anlz?.hp             || 0,
+          // Jokey İstatistikleri
+          jokey_at:     jokey?.da_jokey_at    || 0,
+          jokey_genel:  jokey?.da_genel       || 0,
+          jokey_sehir:  jokey?.da_sehir       || 0,
+          jokey_form:   jokey?.da_form        || 0,
+          jokey_rating: jokey?.da_rating      || 0,
+          jokey_antr:   jokey?.da_jokey_antr  || 0,
+          jokey_sahip:  jokey?.da_jokey_sahip || 0,
+          // Antrenör İstatistikleri
+          antr_at:      antr?.da_antr_at     || 0,
+          antr_genel:   antr?.da_genel       || 0,
+          antr_sehir:   antr?.da_sehir       || 0,
+          antr_rating:  antr?.da_rating      || 0,
+          antr_bin:     antr?.da_antr_bin    || 0,
+          antr_sahip:   antr?.da_antr_sahip  || 0,
+          // Sahip İstatistikleri
+          sahip_at:     sahip?.da_sahip_at   || 0,
+          sahip_genel:  sahip?.da_genel      || 0,
+          sahip_sehir:  sahip?.da_sehir      || 0,
+          sahip_rating: sahip?.da_rating     || 0,
+          sahip_bin:    sahip?.da_sahip_bin  || 0,
+          sahip_antr:   sahip?.da_sahip_antr || 0,
+        },
+        da_jokey:    jokey?.da_jokey   || h.jockey  || '',
+        da_antrenor: antr?.da_antrenor || h.trainer || '',
+        da_sahip:    sahip?.da_sahip   || h.owner   || '',
+        yaris_stili: anlz?.yaris_stili || h.yaris_stili || '',
+        kgs:         anlz?.kgs || h.kgs,
+        da_imported: true,
+      };
+    });
+
+    // Dijital Galop/Derece/HP için ayrı çek
+    fetchDAAnaliz();
+    
+    if (merged > 0) {
+      render();
+      setStatus(`DA ✓ · ${merged} at`);
+    } else {
+      // DA'dan gelen atları ekle (TJK'da olmayan)
+      if (d.at?.length > 0) {
+        d.at.forEach(da => {
+          const exists = race.horses.find(h => h.horse_no === da.horse_no);
+          if (!exists) {
+            race.horses.push({
+              horse_no: da.horse_no, horse_name: da.horse_name,
+              scores: {
+                genel: da.da_genel, sehir: da.da_sehir, pist: da.da_pist,
+                mesafe: da.da_mesafe, form: da.da_form, rating: da.da_rating,
+                pist_mesafe: da.da_pist_mes, baba_pist: da.da_baba_pist,
+                anne_pist: da.da_anne_pist, kardes_pist: da.da_k_pist,
+                baba_mesafe: da.da_baba_mes, anne_mesafe: da.da_anne_mes,
+                at_binici: da.da_at_bin, at_antrenor: da.da_at_antr, at_sahip: da.da_at_sahip,
+              },
+              da_imported: true,
+            });
+            merged++;
+          }
+        });
+        render();
+        setStatus(`DA ✓ · ${merged} at`);
+      } else {
+        setStatus('Hazır');
+      }
+    }
+  } catch(e) {
+    console.warn('[DA]', e.message);
+    setStatus('Hazır');
+  }
+}
+
+// STAT BARS
+function buildStatBars(h){
+  const t=h.length||1;
+  // Ganyan
+  let fav=0,pl=0,su=0,bo=0;
+  h.forEach(x=>{ const s=x.scores?.genel||0; if(s>=70)fav++; else if(s>=55)pl++; else if(s>=40)su++; else bo++; });
+  barChart('sb0',[{l:'Favori',v:Math.round(fav/t*100),c:'#22c55e'},{l:'Plase',v:Math.round(pl/t*100),c:'#e3a008'},{l:'Sürpriz',v:Math.round(su/t*100),c:'#f97316'},{l:'Bomba',v:Math.round(bo/t*100),c:'#ef4444'}]);
+  // HC
+  const hb=[0,0,0,0];
+  h.forEach(x=>{ const v=x.handicap||0; if(v<25)hb[0]++; else if(v<50)hb[1]++; else if(v<75)hb[2]++; else hb[3]++; });
+  barChart('sb1',[{l:'0-30',v:hb[0],c:'#00b4d8'},{l:'31-50',v:hb[1],c:'#a855f7'},{l:'51-70',v:hb[2],c:'#e3a008'},{l:'71+',v:hb[3],c:'#22c55e'}]);
+  // Kilo
+  const kb=[0,0,0,0,0];
+  h.forEach(x=>{ const v=parseFloat(x.weight)||0; if(v<54)kb[0]++; else if(v<56)kb[1]++; else if(v<58)kb[2]++; else if(v<60)kb[3]++; else kb[4]++; });
+  barChart('sb2',[{l:'<54',v:kb[0],c:'#6b7280'},{l:'54-56',v:kb[1],c:'#22c55e'},{l:'56-58',v:kb[2],c:'#e3a008'},{l:'58-60',v:kb[3],c:'#ef4444'},{l:'60+',v:kb[4],c:'#6b7280'}]);
+  // Cinsiyet
+  let erk=0,dis=0;
+  h.forEach(x=>{ const a=x.age||''; if(/\ba\b|aygin/i.test(a))erk++; else dis++; });
+  barChart('sb3',[{l:'Erkek',v:Math.round(erk/t*100),c:'#00b4d8'},{l:'Dişi',v:Math.round(dis/t*100),c:'#f97316'}]);
+}
+
+function barChart(id,items){
+  const el=document.getElementById(id); if(!el) return;
+  const maxV=Math.max(...items.map(i=>i.v),1);
+  el.innerHTML=items.map(item=>{
+    const h=Math.max(4,Math.round((item.v/maxV)*44));
+    return `<div class="sb-col"><div class="sb-bar" style="height:${h}px;background:${item.c}">${item.v>0?'%'+item.v:''}</div><div class="sb-lbl">${item.l}</div></div>`;
+  }).join('');
+}
+
+// TAB SWITCH
+let activeSubTab = 'at';
+function switchTab(tab){
+  activeTab=tab;
+  document.querySelectorAll('.mt').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.mt')[['analiz','istatistik','yapay','metre'].indexOf(tab)]?.classList.add('active');
+  document.getElementById('filterRow').style.display=['analiz','istatistik'].includes(tab)?'flex':'none';
+  document.getElementById('subTabs').style.display=tab==='istatistik'?'flex':'none';
+  if(tab==='yapay') renderYapayZeka();
+  else if(tab==='metre') renderMetre();
+  else render();
+}
+
+function setSubTab(btn, tab) {
+  activeSubTab = tab;
+  activeTab = 'istatistik';
+  document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.mt').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.mt')[1]?.classList.add('active');
+  // Her tab için doğru sort kolonunu ata
+  if(tab==='at')       { sortCol='_scores.rating';       sortDir=-1; }
+  if(tab==='jokey')    { sortCol='_scores.jokey_rating';  sortDir=-1; }
+  if(tab==='antrenor') { sortCol='_scores.antr_rating';   sortDir=-1; }
+  if(tab==='sahip')    { sortCol='_scores.sahip_rating';  sortDir=-1; }
+  render();
+}
+
+// FILTER
+function setFilter(btn,f){
+  document.querySelectorAll('.fc').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  activeFilter=f;
+  // Her filtre kendi sort kolonunu atar
+  const fs={
+    'all':   {col:'_scores.rating',dir:-1},
+    'fav':   {col:'agf',dir:1},
+    'form':  {col:'_scores.form',dir:-1},
+    'hc':    {col:'handicap',dir:-1},
+    'kgs':   {col:'kgs',dir:1},
+    'young': {col:'_scores.rating',dir:-1},
+    'cim':   {col:'_scores.form',dir:-1},
+    'weight':{col:'weight',dir:1},
+  };
+  if(fs[f]){sortCol=fs[f].col;sortDir=fs[f].dir;}
+  render();
+}
+
+// RENDER
+function render(){
+  const race=races[raceIdx];
+  if(!race){return;}
+  let h=[...(race.horses||[])];
+  const q=document.getElementById('searchQ').value.toLowerCase().trim();
+  if(q) h=h.filter(x=>(x.horse_name||'').toLowerCase().includes(q));
+
+  // Filter
+  if(activeFilter==='fav')    h=h.filter(x=>agfNum(x)<20&&agfNum(x)>0);
+  if(activeFilter==='form')   h=h.filter(x=>frmScore(x)>0);
+  if(activeFilter==='hc')     h=h.filter(x=>(x.handicap||0)>0);
+  if(activeFilter==='kgs')    h=h.filter(x=>(x.kgs||0)>0);
+  if(activeFilter==='young')  h=h.filter(x=>(x.age||'').match(/^[34]/));
+  if(activeFilter==='cim')    h=h.filter(x=>(x.last_6||'').includes('Ç')||(x.degree||'').includes('Ç'));
+  if(activeFilter==='weight') h=h.filter(x=>(x.weight||0)>0);
+
+  // Sort
+  h.sort((a,b)=>{
+    let av=gv(a,sortCol), bv=gv(b,sortCol);
+    const an=!av&&av!==0, bn=!bv&&bv!==0;
+    if(an&&bn) return 0; if(an) return 1; if(bn) return -1;
+    return (av>bv?1:av<bv?-1:0)*sortDir;
+  });
+
+  if(!h.length){document.getElementById('mainArea').innerHTML='<div class="empty">Bu filtreye uygun at yok</div>';return;}
+  if(activeTab==='istatistik') {
+    if(activeSubTab==='jokey')         renderJokey(h);
+    else if(activeSubTab==='antrenor') renderAntrenor(h);
+    else if(activeSubTab==='sahip')    renderSahip(h);
+    else                               renderIstatistik(h);
+  } else {
+    renderAnaliz(h);
+  }
+}
+
+function gv(h,col){
+  if(col==='_scores.rating')  return h.scores?.rating||0;
+  if(col==='_scores.form')    return h.scores?.form||frmScore(h);
+  if(col==='_scores.genel')   return h.scores?.genel||0;
+  if(col==='_scores.sehir')   return h.scores?.sehir||0;
+  if(col==='_scores.pist')    return h.scores?.pist||0;
+  if(col==='_scores.mesafe')  return h.scores?.mesafe||0;
+  if(col==='_scores.jokey_at')     return h.scores?.jokey_at||0;
+  if(col==='_scores.jokey_genel')  return h.scores?.jokey_genel||0;
+  if(col==='_scores.jokey_sehir')  return h.scores?.jokey_sehir||0;
+  if(col==='_scores.jokey_form')   return h.scores?.jokey_form||0;
+  if(col==='_scores.jokey_rating') return h.scores?.jokey_rating||0;
+  if(col==='_scores.antr_at')     return h.scores?.antr_at||0;
+  if(col==='_scores.antr_genel')  return h.scores?.antr_genel||0;
+  if(col==='_scores.antr_rating') return h.scores?.antr_rating||0;
+  if(col==='_scores.sahip_at')    return h.scores?.sahip_at||0;
+  if(col==='_scores.sahip_genel') return h.scores?.sahip_genel||0;
+  if(col==='_scores.sahip_rating')return h.scores?.sahip_rating||0;
+  if(col==='agf')   return agfNum(h);
+  if(col==='_scores.dijital_derece') { const v=h.scores?.dijital_derece||h.dijital_derece||'99:99'; const p=v.split(':'); return parseFloat(p[0])*60+parseFloat(p[1]||0); }
+  if(col==='_scores.dijital_galop') return h.scores?.dijital_galop||0;
+  if(col==='_scores.sart_uyumu')   return h.scores?.sart_uyumu||0;
+  if(col==='_scores.hp')           return h.scores?.hp||0;
+  if(col==='weight')return parseFloat(String(h.weight||'0').replace(',','.'))||0;
+  if(col==='handicap') return parseInt(h.handicap)||0;
+  if(col==='kgs')   return parseInt(h.kgs)||9999;
+  if(col==='s20')   return parseInt(h.s20)||9999;
+  if(col==='horse_no') return parseInt(h.horse_no)||0;
+  return h[col]||'';
+}
+
+function mkSort(col) { return ' onclick="sortBy(\'' + col + '\')" style="cursor:pointer"'; }
+
+function renderJokey(h) {
+  const s=h; // Zaten render() tarafından sıralandı
+  let html='<table><thead><tr>'+
+    '<th'+mkSort('horse_no')+'>S.No</th>'+
+    '<th style="text-align:left;min-width:160px">Atın Adı</th>'+
+    '<th style="min-width:110px">Binicisi</th>'+
+    '<th'+mkSort('_scores.jokey_at')+'>Binici At</th>'+
+    '<th'+mkSort('_scores.jokey_genel')+' style="color:var(--gold)">Genel</th>'+
+    '<th'+mkSort('_scores.jokey_sehir')+'>Şehir</th>'+
+    '<th'+mkSort('_scores.jokey_form')+' style="color:var(--green)">Form</th>'+
+    '<th'+mkSort('_scores.jokey_antr')+'>Bin.Antr</th>'+
+    '<th'+mkSort('_scores.jokey_sahip')+'>Bin.Sahip</th>'+
+    '<th'+mkSort('_scores.jokey_rating')+' style="color:var(--gold)">Rating</th>'+
+    '</tr></thead><tbody>';
+  s.forEach(x=>{
+    const no=x.horse_no||0,clr=COLORS[(no-1)%COLORS.length]||'#888',sc2=x.scores||{},sel=selHorse?.horse_no===no;
+    const j=(x.da_jokey||x.jockey||'-').replace(/ AP| JO/g,'');
+    html+='<tr class="'+(sel?'sel':'')+'" onclick="selRow('+esc(x)+')">'+
+      '<td><div class="badge" style="background:'+clr+'22;color:'+clr+';border:1.5px solid '+clr+'55">'+no+'</div></td>'+
+      '<td><div class="hn">'+x.horse_name+'<small>'+j+'</small></div></td>'+
+      '<td style="font-size:12px;font-weight:600">'+j+'</td>'+
+      '<td>'+chip(sc2.jokey_at)+'</td>'+
+      '<td>'+barCell(sc2.jokey_genel)+'</td>'+
+      '<td style="color:var(--muted);font-size:11px">'+(sc2.jokey_sehir||0)+'</td>'+
+      '<td>'+barCell(sc2.jokey_form)+'</td>'+
+      '<td style="color:var(--muted2);font-size:10px">'+(sc2.jokey_antr||0)+'</td>'+
+      '<td style="color:var(--muted2);font-size:10px">'+(sc2.jokey_sahip||0)+'</td>'+
+      '<td><span class="rating">'+(sc2.jokey_rating||'-')+'</span></td>'+
+    '</tr>';
+  });
+  document.getElementById('mainArea').innerHTML=html+'</tbody></table>';}
+
+function renderAntrenor(h) {
+  const s=h; // Zaten render() tarafından sıralandı
+  let html='<table><thead><tr>'+
+    '<th'+mkSort('horse_no')+'>S.No</th>'+
+    '<th style="text-align:left;min-width:160px">Atın Adı</th>'+
+    '<th style="min-width:120px">Antrenörü</th>'+
+    '<th'+mkSort('_scores.antr_at')+'>Antr.At</th>'+
+    '<th'+mkSort('_scores.antr_genel')+' style="color:var(--gold)">Genel</th>'+
+    '<th'+mkSort('_scores.antr_sehir')+'>Şehir</th>'+
+    '<th'+mkSort('_scores.antr_bin')+'>Antr.Binici</th>'+
+    '<th'+mkSort('_scores.antr_sahip')+'>Antr.Sahip</th>'+
+    '<th'+mkSort('_scores.antr_rating')+' style="color:var(--gold)">Rating</th>'+
+    '</tr></thead><tbody>';
+  s.forEach(x=>{
+    const no=x.horse_no||0,clr=COLORS[(no-1)%COLORS.length]||'#888',sc2=x.scores||{},sel=selHorse?.horse_no===no;
+    html+='<tr class="'+(sel?'sel':'')+'" onclick="selRow('+esc(x)+')">'+
+      '<td><div class="badge" style="background:'+clr+'22;color:'+clr+';border:1.5px solid '+clr+'55">'+no+'</div></td>'+
+      '<td><div class="hn">'+x.horse_name+'<small>'+(x.da_antrenor||x.trainer||'')+'</small></div></td>'+
+      '<td style="font-size:12px">'+(x.da_antrenor||x.trainer||'-')+'</td>'+
+      '<td>'+chip(sc2.antr_at)+'</td>'+
+      '<td>'+barCell(sc2.antr_genel||sc2.genel)+'</td>'+
+      '<td style="color:var(--muted);font-size:11px">'+(sc2.antr_sehir||sc2.sehir||0)+'</td>'+
+      '<td style="color:var(--muted2);font-size:10px">'+(sc2.antr_bin||0)+'</td>'+
+      '<td style="color:var(--muted2);font-size:10px">'+(sc2.antr_sahip||0)+'</td>'+
+      '<td><span class="rating">'+(sc2.antr_rating||'-')+'</span></td>'+
+    '</tr>';
+  });
+  document.getElementById('mainArea').innerHTML=html+'</tbody></table>';}
+
+function renderSahip(h) {
+  const s=h; // Zaten render() tarafından sıralandı
+  let html='<table><thead><tr>'+
+    '<th'+mkSort('horse_no')+'>S.No</th>'+
+    '<th style="text-align:left;min-width:160px">Atın Adı</th>'+
+    '<th style="min-width:130px">Sahibi</th>'+
+    '<th'+mkSort('_scores.sahip_at')+'>Sahip At</th>'+
+    '<th'+mkSort('_scores.sahip_genel')+' style="color:var(--gold)">Genel</th>'+
+    '<th'+mkSort('_scores.sahip_sehir')+'>Şehir</th>'+
+    '<th'+mkSort('_scores.sahip_bin')+'>Sahip Binici</th>'+
+    '<th'+mkSort('_scores.sahip_antr')+'>Sahip Antr.</th>'+
+    '<th'+mkSort('_scores.sahip_rating')+' style="color:var(--gold)">Rating</th>'+
+    '</tr></thead><tbody>';
+  s.forEach(x=>{
+    const no=x.horse_no||0,clr=COLORS[(no-1)%COLORS.length]||'#888',sc2=x.scores||{},sel=selHorse?.horse_no===no;
+    html+='<tr class="'+(sel?'sel':'')+'" onclick="selRow('+esc(x)+')">'+
+      '<td><div class="badge" style="background:'+clr+'22;color:'+clr+';border:1.5px solid '+clr+'55">'+no+'</div></td>'+
+      '<td><div class="hn">'+x.horse_name+'<small>'+(x.da_sahip||x.owner||'')+'</small></div></td>'+
+      '<td style="font-size:12px">'+(x.da_sahip||x.owner||'-')+'</td>'+
+      '<td>'+chip(sc2.sahip_at)+'</td>'+
+      '<td>'+barCell(sc2.sahip_genel||sc2.genel)+'</td>'+
+      '<td style="color:var(--muted);font-size:11px">'+(sc2.sahip_sehir||sc2.sehir||0)+'</td>'+
+      '<td style="color:var(--muted2);font-size:10px">'+(sc2.sahip_bin||0)+'</td>'+
+      '<td style="color:var(--muted2);font-size:10px">'+(sc2.sahip_antr||0)+'</td>'+
+      '<td><span class="rating">'+(sc2.sahip_rating||'-')+'</span></td>'+
+    '</tr>';
+  });
+  document.getElementById('mainArea').innerHTML=html+'</tbody></table>';}
+
+
+function agfNum(h){ const s=String(h.agf||'').replace('%','').replace(',','.').split('(')[0].trim(); return parseFloat(s)||999; }
+function frmScore(h){
+  const s=h.last_6||''; const pts={1:100,2:80,3:60,4:40,5:30,6:20};
+  const d=[...s].filter(c=>/[0-9]/.test(c)).map(Number);
+  if(!d.length) return 0;
+  let t=0,w=1;
+  for(let i=d.length-1;i>=0;i--){t+=(pts[d[i]]||10)*w;w*=0.85;}
+  return Math.min(100,Math.round(t/50));
+}
+
+// Map score column to DA sort column key
+const DA_COL_MAP = {
+  '_scores.genel':'genel', '_scores.sehir':'sehir', '_scores.pist':'pist',
+  '_scores.mesafe':'mesafe', '_scores.form':'form', '_scores.rating':'rating',
+  '_scores.at_binici':'at_bin', '_scores.at_antrenor':'at_antr', '_scores.at_sahip':'at_sahip',
+  '_scores.jokey_genel':'genel', '_scores.jokey_sehir':'sehir', '_scores.jokey_form':'form',
+  '_scores.jokey_at':'jokey_at', '_scores.jokey_rating':'rating',
+  '_scores.jokey_antr':'jokey_antr', '_scores.jokey_sahip':'jokey_sahip',
+  '_scores.antr_genel':'genel', '_scores.antr_sehir':'sehir', '_scores.antr_at':'antr_at',
+  '_scores.antr_rating':'rating', '_scores.antr_bin':'antr_bin', '_scores.antr_sahip':'antr_sahip',
+  '_scores.sahip_genel':'genel', '_scores.sahip_sehir':'sehir', '_scores.sahip_at':'sahip_at',
+  '_scores.sahip_rating':'rating', '_scores.sahip_bin':'sahip_bin', '_scores.sahip_antr':'sahip_antr',
+};
+
+function sortBy(col){
+  const defaultAsc=['kgs','s20','agf','horse_no','weight','start_no'];
+  if(sortCol===col) sortDir*=-1;
+  else{sortCol=col; sortDir=defaultAsc.includes(col)?1:-1;}
+  
+  // Önce mevcut veriyle sırala
+  
+  if(activeTab==='analiz'){
+    activeFilter='all';
+    document.querySelectorAll('.fc').forEach(b=>b.classList.remove('on'));
+    document.querySelector('.fc')?.classList.add('on');
+  }
+  render();
+}
+
+async function fetchDAAnaliz() {
+  const race = races[raceIdx];
+  if (!race) return;
+  const city = document.getElementById('citySel').value;
+  const dateStr = fmt(date);
+  try {
+    const r = await fetch(`${API}/api/da/analiz?city=${city}&date=${encodeURIComponent(dateStr)}&race=${race.no}`);
+    const d = await r.json();
+    if (!d.ok || !d.rows?.length) return;
+    
+    let updated = 0;
+    race.horses = race.horses.map(h => {
+      const anlz = d.rows.find(x => x.no === h.horse_no);
+      if (!anlz) return h;
+      updated++;
+      return {
+        ...h,
+        scores: {
+          ...h.scores,
+          rating:        anlz.rating || h.scores?.rating || 0,
+          dijital_galop: anlz.dijital_galop || 0,
+          dijital_derece:anlz.dijital_derece || null,
+          sart_uyumu:    anlz.sart_uyumu || 0,
+          hp:            anlz.hp || 0,
+        }
+      };
+    });
+    if (updated > 0) { render(); console.log('[DA Analiz]', updated, 'at güncellendi'); }
+  } catch(e) { console.warn('[DA Analiz]', e.message); }
+}
+
+async function fetchDASorted(col) {
+  const race = races[raceIdx];
+  if (!race) return;
+  const city = document.getElementById('citySel').value;
+  const dateStr = fmt(date);
+  const daCol = DA_COL_MAP[col] || 'rating';
+  const dir = sortDir === -1 ? 'desc' : 'asc';
+  const tab = activeSubTab || 'at';
+
+  setStatus('DA sıralama...');
+  try {
+    const r = await fetch(`${API}/api/da/sort?city=${city}&date=${encodeURIComponent(dateStr)}&race=${race.no}&tab=${tab}&col=${daCol}&dir=${dir}`);
+    const d = await r.json();
+    if (!d.ok || !d.rows?.length) { render(); return; }
+
+    // DA sırasına göre horses'ı yeniden sırala
+    const horseMap = {};
+    race.horses.forEach(h => { horseMap[h.horse_no] = h; horseMap[h.horse_name] = h; });
+
+    const sorted = d.rows.map(row => {
+      const no = parseInt(row[0]);
+      const name = (row[1]||'').trim();
+      return horseMap[no] || horseMap[name] || null;
+    }).filter(Boolean);
+
+    // Olmayan atları sona ekle
+    const inSorted = new Set(sorted.map(h => h.horse_no));
+    race.horses.forEach(h => { if (!inSorted.has(h.horse_no)) sorted.push(h); });
+
+    // Sıralı listeyi render et
+    const h = sorted;
+    if(activeSubTab==='jokey')         renderJokey(h);
+    else if(activeSubTab==='antrenor') renderAntrenor(h);
+    else if(activeSubTab==='sahip')    renderSahip(h);
+    else                               renderIstatistik(h);
+
+    setStatus(`DA sıralama ✓`);
+  } catch(e) {
+    console.warn('[sort]', e.message);
+    render();
+  }
+}
+
+function sc(col){return sortCol===col?(sortDir===1?'asc':'desc'):'';}
+
+// ── KOŞU ANALİZ ──────────────────────────────────────────────────────────────
+function renderAnaliz(h){
+  document.getElementById('mainArea').innerHTML=`
+  <table>
+    <thead><tr>
+      <th onclick="sortBy('horse_no')" class="${sc('horse_no')}">S.No</th>
+      <th style="text-align:left;min-width:200px">Atın Adı ve Gücü</th>
+      <th onclick="sortBy('age')" class="${sc('age')}">Yaş</th>
+      <th>Kul.Var</th>
+      <th onclick="sortBy('weight')" class="${sc('weight')}">Kilo</th>
+      <th>TS</th>
+      <th>AJ</th>
+      <th onclick="sortBy('jockey')" class="${sc('jockey')}" style="min-width:100px">Binicisi</th>
+      <th>ED</th>
+      <th onclick="sortBy('kgs')" class="${sc('kgs')}">Kgs</th>
+      <th onclick="sortBy('_scores.dijital_derece')" class="${sc('_scores.dijital_derece')}" style="color:var(--cyan)">Dijital Derece</th>
+      <th onclick="sortBy('_scores.rating')" class="${sc('_scores.rating')}" style="color:var(--gold)">Rating</th>
+      <th onclick="sortBy('_scores.dijital_galop')" class="${sc('_scores.dijital_galop')}" style="color:var(--green)">Dijital Galop</th>
+      <th onclick="sortBy('_scores.sart_uyumu')" class="${sc('_scores.sart_uyumu')}">Şart Uyumu</th>
+      <th onclick="sortBy('_scores.hp')" class="${sc('_scores.hp')}">H.P</th>
+    </tr></thead>
+    <tbody>${h.map(rowAnaliz).join('')}</tbody>
+  </table>`;}
+
+
+function rowAnaliz(h){
+  const no=h.horse_no||0, clr=COLORS[(no-1)%COLORS.length]||'#888';
+  const sel=selHorse?.horse_no===no;
+  const scores=h.scores||{};
+  const agf = h.agf||'';
+  const agfNum2 = agfNum(h);
+  const agfClr = agfNum2<=20?'var(--green)':agfNum2<=40?'var(--gold)':'var(--muted)';
+  
+  // Yarış stili renk
+  const ys = h.yaris_stili||scores.yaris_stili||'';
+  const ysClr = ys==='Kaçak'?'var(--green)':ys==='Sprinter'?'var(--gold)':ys==='En Takipçi'?'var(--muted)':'var(--cyan)';
+  
+  // Dijital Galop bar
+  const galop = scores.dijital_galop||0;
+  const galopBar = galop>0 ? 
+    '<div style="display:flex;align-items:center;gap:3px;min-width:70px">'+
+    '<div style="flex:1;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden">'+
+    '<div style="width:'+Math.min(galop,100)+'%;height:100%;background:var(--green);border-radius:2px"></div></div>'+
+    '<span style="font-size:11px;color:var(--green)">'+(galop.toFixed?galop.toFixed(2):galop)+'</span></div>' 
+    : '<span style="color:var(--muted2)">-</span>';
+
+  return '<tr class="'+(sel?'sel':'')+(agfNum2<=20?' fav':'')+'" onclick="selRow('+esc(h)+')" style="border-bottom:1px solid rgba(48,54,61,.4)">'+
+    '<td><div class="badge" style="background:'+clr+'22;color:'+clr+';border:1.5px solid '+clr+'55">'+no+'</div></td>'+
+    '<td>'+
+      '<div style="display:flex;align-items:center;gap:6px">'+
+        '<span style="background:'+agfClr+'22;color:'+agfClr+';border:1px solid '+agfClr+'44;border-radius:3px;padding:1px 6px;font-size:11px;font-weight:700">%'+agf.replace('%','')+'</span>'+
+        '<div>'+
+          '<div style="font-weight:600;font-size:13px">'+h.horse_name+'</div>'+
+          '<div style="font-size:10px;color:var(--muted)">'+
+            (h.father?h.father.split('(')[0].trim().slice(0,12):'')+(h.mother?' / '+h.mother.split('(')[0].trim().slice(0,10):'')+'</div>'+
+        '</div>'+
+      '</div>'+
+    '</td>'+
+    '<td style="font-size:11px;color:var(--muted)">'+(h.age||'-')+'</td>'+
+    '<td style="font-size:10px;color:var(--muted2)">'+(h.kul_var||'')+'</td>'+
+    '<td><b>'+(h.weight||'-')+'</b></td>'+
+    '<td style="font-size:10px;color:var(--muted)">'+(h.ts||h.start_no||'-')+'</td>'+
+    '<td style="font-size:11px;color:var(--muted)">'+(h.aj||h.aj_type||'')+'</td>'+
+    '<td style="font-size:12px">'+(h.jockey||'-').replace(/ AP| JO/g,'')+'</td>'+
+    '<td style="font-size:10px;color:var(--muted)">'+(h.ed||'')+'</td>'+
+    '<td>'+chip(h.kgs,true)+'</td>'+
+    '<td style="color:var(--cyan);font-weight:600;font-size:12px">'+(scores.dijital_derece||h.dijital_derece||'-')+'</td>'+
+    '<td><span style="font-family:var(--fl);font-size:14px;font-weight:700;color:var(--gold)">'+(scores.rating||'-')+'</span></td>'+
+    '<td>'+galopBar+'</td>'+
+    '<td style="font-size:11px;color:'+(scores.sart_uyumu&&scores.sart_uyumu<0?'var(--red)':'var(--green)')+'">'+
+      (scores.sart_uyumu?scores.sart_uyumu+' Hp':'-')+'</td>'+
+    '<td style="font-size:11px;color:var(--muted)">'+(scores.hp||'-')+'</td>'+
+  '</tr>';}
+
+
+// ── KOŞU İSTATİSTİK ──────────────────────────────────────────────────────────
+function renderIstatistik(h){
+  document.getElementById('mainArea').innerHTML=`
+  <table>
+    <thead><tr>
+      <th onclick="sortBy('horse_no')" class="${sc('horse_no')}">S.No</th>
+      <th style="text-align:left;min-width:160px">Atın Adı</th>
+      <th onclick="sortBy('_scores.genel')" class="${sc('_scores.genel')}" style="color:var(--gold)">Genel</th>
+      <th onclick="sortBy('_scores.form')" class="${sc('_scores.form')}" style="color:var(--green)">Form</th>
+      <th onclick="sortBy('_scores.sehir')" class="${sc('_scores.sehir')}">Şehir</th>
+      <th onclick="sortBy('_scores.pist')" class="${sc('_scores.pist')}">Pist</th>
+      <th onclick="sortBy('_scores.mesafe')" class="${sc('_scores.mesafe')}">Mesafe</th>
+      <th onclick="sortBy('_scores.form')" class="${sc('_scores.form')}" style="color:var(--green)">Form</th>
+      <th onclick="sortBy('weight')" class="${sc('weight')}">Kilo</th>
+      <th>Pist Mes.</th>
+      <th>Baba Pist</th>
+      <th>Anne Pist</th>
+      <th>K.Pist</th>
+      <th>Baba Mes.</th>
+      <th>Anne Mes.</th>
+      <th>At Bin.</th>
+      <th>At Antr.</th>
+      <th>At Sahip</th>
+      <th onclick="sortBy('_scores.rating')" class="${sc('_scores.rating')}" style="color:var(--gold)">Rating</th>
+    </tr></thead>
+    <tbody>${h.map(rowIst).join('')}</tbody>
+  </table>`;
+}
+
+function barCell(val, max=100) {
+  const n = parseInt(val)||0;
+  const clr = n>=70?'var(--green)':n>=40?'var(--gold)':'var(--muted)';
+  const w = Math.round((n/max)*100);
+  return `<div class="bar-cell">
+    <div class="bar-bg"><div class="bar-fill" style="width:${w}%;background:${clr}"></div></div>
+    <span style="font-size:11px;color:${clr};font-weight:600;min-width:22px">${n||0}</span>
+  </div>`;
+}
+
+function rowIst(h){
+  const no=h.horse_no||0, clr=COLORS[(no-1)%COLORS.length]||'#888';
+  const sel=selHorse?.horse_no===no;
+  const sc=h.scores||{};
+  return `<tr class="${sel?'sel':''}" onclick="selRow(${esc(h)})">
+    <td><div class="badge" style="background:${clr}22;color:${clr};border:1.5px solid ${clr}55">${no}</div></td>
+    <td><div class="hn">${h.horse_name||'-'}<small>${(h.jockey||'').replace(/ AP| JO/g,'')}</small></div></td>
+    <td>${barCell(sc.genel)}</td>
+    <td style="color:var(--muted);font-size:11px;text-align:center">${sc.sehir||0}</td>
+    <td style="color:var(--muted);font-size:11px;text-align:center">${sc.pist||0}</td>
+    <td style="color:var(--muted);font-size:11px;text-align:center">${sc.mesafe||0}</td>
+    <td>${barCell(sc.form)}</td>
+    <td><b>${h.weight||'-'}</b></td>
+    <td style="color:var(--muted);font-size:11px">${sc.pist_mesafe||0}</td>
+    <td style="color:var(--muted2);font-size:10px">${sc.baba_pist||0}</td>
+    <td style="color:var(--muted2);font-size:10px">${sc.anne_pist||0}</td>
+    <td style="color:var(--muted2);font-size:10px">${sc.kardes_pist||0}</td>
+    <td style="color:var(--muted2);font-size:10px">${sc.baba_mesafe||0}</td>
+    <td style="color:var(--muted2);font-size:10px">${sc.anne_mesafe||0}</td>
+    <td style="color:var(--muted2);font-size:10px">${sc.at_binici||0}</td>
+    <td style="color:var(--muted2);font-size:10px">${sc.at_antrenor||0}</td>
+    <td style="color:var(--muted2);font-size:10px">${sc.at_sahip||0}</td>
+    <td><span class="rating">${sc.rating||'-'}</span></td>
+  </tr>`;
+}
+
+function rStyle(h){
+  const k=h.kgs||99;
+  if(k<=10) return '<span style="color:var(--green);font-size:11px">Kaçak</span>';
+  if(k<=20) return '<span style="color:var(--gold);font-size:11px">Sprinter</span>';
+  if(k<=40) return '<span style="color:var(--cyan);font-size:11px">Orta</span>';
+  return '<span style="color:var(--muted);font-size:11px">En Takipçi</span>';
+}
+
+// ── YAPAY ZEKA TAHMIN ─────────────────────────────────────────────────────────
+function renderYapayZeka(){
+  if(!aiData){
+    document.getElementById('mainArea').innerHTML=`
+      <div style="padding:2rem;text-align:center">
+        <div style="font-family:var(--fl);font-size:13px;color:var(--muted);margin-bottom:1rem">Yapay Zeka analizi için butona tıklayın</div>
+        <button class="ai-btn" style="width:200px;margin:0 auto" onclick="runAI()">
+          <span>⚡ AI ile Analiz Et</span>
+        </button>
+      </div>`;
+    return;
+  }
+
+  const race=races[raceIdx];
+  const ranking=aiData.ranking||[];
+  
+  // Kupon hesapla
+  const coupons=calcCoupons(ranking);
+
+  document.getElementById('mainArea').innerHTML=`
+  <div class="yz-wrap">
+    <div class="yz-left">
+      <div class="yz-title">YZ Destekli Altılı Ganyan Kurgusu</div>
+      <div class="yz-text">${aiData.summary||'Analiz yapılıyor...'}</div>
+      <div style="margin-top:1rem">
+        ${ranking.slice(0,8).map((r,i)=>`
+          <div class="ar" style="padding:.4rem 0">
+            <div class="ar-rk ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+            <div class="ar-info">
+              <div class="ar-nm">#${r.horse_no} ${r.horse_name||''}</div>
+              <div class="ar-rs">${r.reason||''}</div>
+              <div class="ar-bar"><div class="ar-bf" style="width:${r.prob}%;background:${i===0?'var(--gold)':i===1?'#c0c0c0':i===2?'#cd7f32':'rgba(255,255,255,.2)'}"></div></div>
+            </div>
+            <div class="ar-pb" style="color:${i===0?'var(--gold)':'rgba(255,255,255,.5)'}">${r.prob}%</div>
+          </div>`).join('')}
+      </div>
+      <div style="font-size:10px;color:var(--muted2);margin-top:.75rem;text-align:center">Güven: ${aiData.confidence}% · Sonuç garantisi verilmez</div>
+    </div>
+    <div>
+      ${coupons.map(c=>`
+      <div class="yz-right" style="margin-bottom:.75rem">
+        <div class="kupon-title">YZ Altılı Ganyan Kuponu</div>
+        <div class="kupon-tutar">Tutar: ${c.budget.toLocaleString('tr')},00 TL</div>
+        <div class="kupon-grid">
+          ${[1,2,3,4,5,6].map(a=>`<div class="kg-head">${a}A</div>`).join('')}
+          ${renderKuponRows(c.legs)}
+        </div>
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:.3rem">
+          ${c.kolon} kolon × ${UNIT} ₺ × ${c.misli} = <b style="color:var(--gold)">${c.budget} ₺</b> · Banko: ${c.bankos.map(b=>'#'+b).join(', ')}
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderKuponRows(legs){
+  const maxRows=Math.max(...legs.map(l=>l.length));
+  let html='';
+  for(let r=0;r<maxRows;r++){
+    html+=legs.map((leg,li)=>{
+      const no=leg[r];
+      const cls=r===0?'banko':leg.length===1?'banko':'alt';
+      return no?`<div class="kg-cell ${cls}">${no}</div>`:`<div class="kg-cell" style="border:none;background:none"></div>`;
+    }).join('');
+  }
+  return html;
+}
+
+function calcCoupons(ranking){
+  const targets=[{budget:1500,misli:1,kolon:1200},{budget:3000,misli:1,kolon:2400},{budget:1500,misli:2,kolon:600},{budget:3000,misli:2,kolon:1200}];
+  return targets.map(t=>{
+    const bankos=t.misli===1?ranking.slice(0,2).map(r=>r.horse_no):ranking.slice(0,1).map(r=>r.horse_no);
+    // 6 ayak oluştur
+    const legs=[];
+    const sorted=[...ranking].slice(0,Math.max(6,ranking.length));
+    // Banko atlar tek seçim, diğerleri gruplar
+    for(let i=0;i<6;i++){
+      if(i<bankos.length) legs.push([bankos[i]]);
+      else legs.push(sorted.slice(i,i+2).map(r=>r.horse_no));
+    }
+    return{...t,legs,bankos};
+  });
+}
+
+// ── DİJİTAL METRE ─────────────────────────────────────────────────────────────
+// Her kart = bir koşu (tüm atlar)
+// DijitalAnaliz gibi: 1.Ayak=1.Koşu, 2.Ayak=2.Koşu ...
+function renderMetre(){
+  if(!races.length) return;
+
+  // Mevcut koşudan başlayarak max 6 koşu göster
+  const startIdx = raceIdx;
+  const shown = races.slice(startIdx, startIdx + 6);
+
+  document.getElementById('mainArea').innerHTML=`
+  <div class="metre-wrap">
+    ${shown.map((race, gi)=>{
+      const h = race.horses || [];
+      if(!h.length) return '';
+
+      // Rating toplamı
+      const total = h.reduce((s,x)=>s+(x.scores?.rating||1),0) || 1;
+
+      // Rating'e göre sırala
+      const sorted = [...h].sort((a,b)=>(b.scores?.rating||0)-(a.scores?.rating||0));
+
+      // En yüksek rating'e göre normalize (max %100)
+      const maxRating = sorted[0]?.scores?.rating || 1;
+
+      return `<div class="metre-card">
+        <div class="mc-title">${race.no}.Ayak [${race.dist}m]</div>
+        ${sorted.map((x,ri)=>{
+          const no = x.horse_no || 0;
+          const pct = Math.round(((x.scores?.rating||1)/total)*100);
+          const barW = Math.round(((x.scores?.rating||1)/maxRating)*100);
+          const clr = COLORS[(no-1)%COLORS.length]||'#888';
+          const barClr = ri===0?'var(--green)':ri===1?'var(--cyan)':pct<8?'var(--red)':'var(--gold)';
+          return `<div class="mc-row">
+            <div class="mc-no" style="background:${clr}22;color:${clr};border:1px solid ${clr}44">${no}</div>
+            <div class="mc-bar-bg"><div class="mc-bar-fill" style="width:${barW}%;background:${barClr}"></div></div>
+            <div class="mc-pct" style="color:${barClr};font-size:11px">(%${pct})</div>
+          </div>`;
+        }).join('')}
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+// ── AI ────────────────────────────────────────────────────────────────────────
+async function runAI(){
+  const race=races[raceIdx];
+  if(!race?.horses?.length) return;
+  const btn=document.getElementById('aiBtn');
+  const txt=document.getElementById('aiBtnTxt');
+  const ld=document.getElementById('aiLd');
+  btn.disabled=true; txt.textContent='Analiz ediliyor';
+  ld.classList.add('on');
+
+  try{
+    const city=document.getElementById('citySel').options[document.getElementById('citySel').selectedIndex]?.text||'';
+    const r=await fetch(`${API}/api/analyze`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({race:{...race,cityName:city,date:fmt(date)},horses:race.horses}),
+    });
+    const d=await r.json();
+    if(!d.ok) throw new Error(d.error);
+    aiData=d;
+
+    // Side panel
+    const res=document.getElementById('aiRes');
+    res.style.display='block';
+    const BCLR=['var(--gold)','#c0c0c0','#cd7f32','rgba(255,255,255,.3)'];
+    res.innerHTML=(d.ranking||[]).slice(0,6).map((r,i)=>`
+      <div class="ar">
+        <div class="ar-rk ${i===0?'r1':i===1?'r2':i===2?'r3':''}">${i+1}</div>
+        <div class="ar-info">
+          <div class="ar-nm">#${r.horse_no} ${r.horse_name||''}</div>
+          <div class="ar-bar"><div class="ar-bf" style="width:${r.prob}%;background:${BCLR[i]||'rgba(255,255,255,.2)'}"></div></div>
+        </div>
+        <div class="ar-pb" style="color:${i===0?'var(--gold)':'rgba(255,255,255,.5)'}">${r.prob}%</div>
+      </div>`).join('')+
+      (d.summary?`<div class="ai-sum">${d.summary}</div>`:'');
+
+    // Switch to yapay zeka tab
+    switchTab('yapay');
+    showToast('Analiz tamamlandı');
+  }catch(e){
+    showToast(e.message,true);
+  }
+  btn.disabled=false; txt.textContent='AI ile Analiz Et';
+  ld.classList.remove('on');
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function chip(v,rev=false){
+  if(!v&&v!==0) return '<span class="sc z">-</span>';
+  const n=parseInt(v); if(isNaN(n)) return '<span class="sc z">-</span>';
+  const cls=rev?(n<=20?'h sc':n<=50?'m sc':'l sc'):(n>=60?'h sc':n>=30?'m sc':'l sc');
+  return `<span class="${cls}">${n}</span>`;
+}
+
+function fDot(c){
+  const n=parseInt(c);
+  const cls=n===1?'f1':n===2?'f2':n===3?'f3':'fn';
+  return `<div class="fd ${cls}">${isNaN(n)?c:n}</div>`;
+}
+
+function esc(h){ return JSON.stringify(h).replace(/"/g,'&quot;'); }
+
+function selRow(h){
+  selHorse=h; render();
+  const sec=document.getElementById('hdSec');
+  sec.style.display='block';
+  document.getElementById('hdContent').innerHTML=[
+    ['At Adı',h.horse_name],['Yaş',h.age],['Baba',h.father],['Anne',h.mother],
+    ['Jokey',h.jockey],['Sahip',h.owner],['Antrenör',h.trainer],
+    ['Kilo',h.weight?h.weight+' kg':'-'],['Start No',h.start_no],
+    ['HC',h.handicap],['Son 6',h.last_6],['KGS',h.kgs],['S20',h.s20],
+    ['AGF',h.agf],['En İyi Derece',h.degree],
+    ['Genel Skor',h.scores?.genel],['Form Skor',frmScore(h)],['Rating',h.scores?.rating],
+  ].map(([k,v])=>`<div class="hd-row"><span class="hdk">${k}</span><span class="hdv">${v||'-'}</span></div>`).join('');
+}
+</script>
+</body>
+</html>
